@@ -1,14 +1,14 @@
 [
   {
-    "name": "item 2",
+    "name": "item 1",
     "quantity": 1,
     "price": 1,
-    "bought": false
+    "bought": true
   },
   {
-    "name": "item 3",
-    "quantity": 3,
-    "price": 5,
+    "name": "item 1",
+    "quantity": 1,
+    "price": 1,
     "bought": true
   }
 ]
