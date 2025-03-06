@@ -6,26 +6,19 @@ const DATA_FILE = "./util/data/data.json"
 let groceryList = [];
 
 function loadGroceryList() {
-
-
-    fs.readFile(DATA_FILE, 'utf8', (err, data) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                logger.warn('No existing grocery list found. Starting fresh.');
-                groceryList = [];
-                return;
-            }
-            logger.error('Error loading grocery list: ' + err.message);
-            return;
-        }
-        try {
+    try {
+        if (fs.existsSync(DATA_FILE)) {
+            const data = fs.readFileSync(DATA_FILE, 'utf8');
             groceryList = JSON.parse(data);
             logger.info('Grocery list loaded successfully.');
-        } catch (parseError) {
-            logger.error('Error parsing grocery list: ' + parseError.message);
+        } else {
+            logger.warn('No existing grocery list found. Starting fresh.');
             groceryList = [];
         }
-    });
+    } catch (err) {
+        logger.error('Error loading grocery list: ' + err.message);
+        groceryList = [];
+    }
 
 
 
