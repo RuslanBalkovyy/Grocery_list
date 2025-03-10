@@ -1,0 +1,65 @@
+let { getGroceryList, addItem, removeItem, markAsBought } = require('../groceryService');
+const { loadGroceryList, saveGroceryList } = require('../storage');
+const { logger } = require('../util/logger');
+
+jest.mock('../storage');
+jest.mock('../util/logger');
+
+describe('Grocery Service', () => {
+    beforeEach(() => {
+        loadGroceryList.mockReturnValue([{ name: 'Banana', quantity: 2, price: 1.0, bought: false }]);
+        getGroceryList = jest.fn(() => loadGroceryList());
+        saveGroceryList.mockClear();
+        logger.info.mockClear();
+        logger.warn.mockClear();
+    });
+
+    test('should return the grocery list', () => {
+        const list = getGroceryList();
+        expect(list).toEqual([{ name: 'Banana', quantity: 2, price: 1.0, bought: false }]);
+    });
+
+    test('should add an item to the grocery list', () => {
+        const newItem = addItem('Apple', 3, 1.5);
+        expect(newItem).toEqual({ name: 'Apple', quantity: 3, price: 1.5, bought: false });
+        expect(saveGroceryList).toHaveBeenCalledWith([newItem]);
+        expect(logger.info).toHaveBeenCalledWith('Added item: Apple');
+    });
+
+    test('should remove an item from the grocery list', () => {
+        addItem('Apple', 3, 1.5);
+        const removedItem = removeItem(0);
+        expect(removedItem).toEqual({ name: 'Apple', quantity: 3, price: 1.5, bought: false });
+        expect(saveGroceryList).toHaveBeenCalledWith([]);
+        expect(logger.info).toHaveBeenCalledWith('Removed Apple from the list.');
+    });
+
+    test('should return null when trying to remove an item with invalid index', () => {
+        const removedItem = removeItem(1);
+        expect(removedItem).toBeNull();
+        expect(saveGroceryList).not.toHaveBeenCalled();
+    });
+
+    test('should mark an item as bought', () => {
+        addItem('Apple', 3, 1.5);
+        const boughtItem = markAsBought(0);
+        expect(boughtItem).toEqual({ name: 'Apple', quantity: 3, price: 1.5, bought: true });
+        expect(saveGroceryList).toHaveBeenCalledWith([boughtItem]);
+        expect(logger.info).toHaveBeenCalledWith('Marked Apple as bought');
+    });
+
+    test('should return null when trying to mark an item as bought with invalid index', () => {
+        const boughtItem = markAsBought(1);
+        expect(boughtItem).toBeNull();
+        expect(saveGroceryList).not.toHaveBeenCalled();
+    });
+
+    test('should warn when trying to mark an already bought item', () => {
+        addItem('Apple', 3, 1.5);
+        markAsBought(0);
+        const boughtItem = markAsBought(0);
+        expect(boughtItem).toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith('Item Apple is already marked as bought.');
+        expect(saveGroceryList).toHaveBeenCalledTimes(1); // Only called once during the first markAsBought
+    });
+});

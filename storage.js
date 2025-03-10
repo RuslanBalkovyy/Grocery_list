@@ -26,7 +26,7 @@ function loadGroceryList() {
 }
 
 function saveGroceryList(groceryList) {
-    fs.writeFile(DATA_FILE, JSON.stringify(groceryList, null, 2), "utf8", (err) => {
+    fs.writeFile(DATA_FILE, JSON.stringify(groceryList), "utf8", (err) => {
         if (err) {
             logger.error(`Error while saving grocery list: ${err.message}`);
         }
